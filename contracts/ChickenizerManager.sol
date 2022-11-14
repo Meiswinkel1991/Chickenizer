@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "./interfaces/IBorrowerOperations.sol";
+import "./interfaces/Liquity/IBorrowerOperations.sol";
+import "./interfaces/Chickenize/ICHKNStakingPool.sol";
 
 /** TODOS
  *  1. open, close and controll the trove
@@ -13,6 +14,8 @@ contract ChickenFarmManager {
     constructor(address _borrowerOperaterAddress) {
         borrowerOperator = IBorrowerOperations(_borrowerOperaterAddress);
     }
+
+    function manageTrove() external {}
 
     function openTrove(
         uint256 _maxFee,

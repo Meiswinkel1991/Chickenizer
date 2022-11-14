@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.7;
 
-import "./token/IERC20.sol";
-import "./token/IERC2612.sol";
+import "../token/IERC20.sol";
+import "../token/IERC2612.sol";
 
 interface ILUSDToken is IERC20, IERC2612 {
     // --- Events ---

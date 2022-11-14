@@ -25,6 +25,9 @@ module.exports = {
     solidity: {
         compilers: [
             {
+                version: "0.8.9",
+            },
+            {
                 version: "0.8.7",
             },
             {
@@ -91,13 +94,7 @@ module.exports = {
     },
     contractSizer: {
         runOnCompile: false,
-        only: [
-            "APIConsumer",
-            "AutomationCounter",
-            "NFTFloorPriceConsumerV3",
-            "PriceConsumerV3",
-            "RandomNumberConsumerV2",
-        ],
+        only: [],
     },
     paths: {
         sources: "./contracts",
