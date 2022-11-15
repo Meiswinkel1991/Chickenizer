@@ -12,17 +12,25 @@ error CHKNStakingPool__AmountGreaterStackedETH();
 error CHKNStakingPool__FailedToSendEther();
 
 contract CHKNStakingPool {
+    struct StakerInfo {
+        uint256 stakedEther;
+        uint256 lastSnapshot;
+        uint256 rewardsPerEther;
+    }
+
     /* ====== Interfaces ====== */
-    IChickenizerETH public immutable stakingToken; // cnETH
+    // IChickenizerETH public immutable stakingToken; // cnETH
     IBorrowerOperations private immutable borrowerOperatorLiquity;
     ITroveManager private immutable troveManagerLiquity;
     ISortedTroves private immutable sortedTrovesLiquity;
     IHintHelpers private immutable hintHelpersLiquity;
 
     /* ====== State Variables ====== */
-    uint256 public constant LUSD_GAS_COMPENSATION = 1;
+    uint256 public constant LUSD_GAS_COMPENSATION = 200e18;
 
     uint256 private totalStakedETH;
+
+    mapping(address => StakerInfo) private stakers;
 
     /* ====== Events ====== */
     event TotalStakeUpdated(uint256 newTotalStakedTokens);
@@ -38,13 +46,11 @@ contract CHKNStakingPool {
     }
 
     constructor(
-        address _stakingTokenAddress,
         address _borrowerOperator,
         address _troveManagerLiquityAddress,
         address _hintHelpersAddress,
         address _sortedTroveAddress
     ) {
-        stakingToken = IChickenizerETH(_stakingTokenAddress);
         borrowerOperatorLiquity = IBorrowerOperations(_borrowerOperator);
         troveManagerLiquity = ITroveManager(_troveManagerLiquityAddress);
         hintHelpersLiquity = IHintHelpers(_hintHelpersAddress);
@@ -83,25 +89,23 @@ contract CHKNStakingPool {
 
         totalStakedETH += _sentETH;
 
-        stakingToken.mint(msg.sender, _sentETH);
+        stakers[msg.sender].stakedEther += _sentETH;
 
         emit TotalStakeUpdated(totalStakedETH);
     }
 
     function unstake(uint256 _amount) external {
-        uint256 _balanceStakedTokens = stakingToken.balanceOf(msg.sender);
+        uint256 _balanceStakedTokens = stakers[msg.sender].stakedEther;
 
         if (_amount > _balanceStakedTokens) {
             revert CHKNStakingPool__AmountGreaterStackedETH();
         }
 
-        stakingToken.burnFrom(msg.sender, _amount);
+        stakers[msg.sender].stakedEther -= _amount;
 
         totalStakedETH -= _amount;
 
-        (bool sent, bytes memory data) = address(msg.sender).call{
-            value: _amount
-        }("");
+        (bool sent, ) = address(msg.sender).call{value: _amount}("");
 
         if (!sent) {
             revert CHKNStakingPool__FailedToSendEther();
@@ -117,7 +121,7 @@ contract CHKNStakingPool {
     /* ====== Internal Functions ====== */
 
     function _getHints(uint256 _nominalICR)
-        internal
+        public
         view
         returns (address, address)
     {
@@ -139,8 +143,12 @@ contract CHKNStakingPool {
 
     /* ====== View / Pure Functions ====== */
 
-    function getStakingTokenAddress() external view returns (address) {
-        return address(stakingToken);
+    function getStakerInformations(address _staker)
+        external
+        view
+        returns (StakerInfo memory)
+    {
+        return stakers[_staker];
     }
 
     function getBalance() public view returns (uint256) {

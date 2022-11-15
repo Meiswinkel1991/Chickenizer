@@ -1,4 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox")
+require("hardhat-deploy")
 require("./tasks")
 require("dotenv").config()
 
@@ -47,8 +48,8 @@ module.exports = {
             // If you want to do some forking set `enabled` to true
             forking: {
                 url: MAINNET_RPC_URL,
-                blockNumber: FORKING_BLOCK_NUMBER,
-                enabled: false,
+                // blockNumber: FORKING_BLOCK_NUMBER,
+                enabled: true,
             },
             chainId: 31337,
         },
@@ -83,6 +84,11 @@ module.exports = {
         apiKey: {
             polygon: POLYGONSCAN_API_KEY,
             goerli: ETHERSCAN_API_KEY,
+        },
+    },
+    namedAccounts: {
+        deployer: {
+            default: 0,
         },
     },
     gasReporter: {
